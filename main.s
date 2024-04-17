@@ -3,8 +3,11 @@
 .section .rodata
 TEST_FLOATS:
   .string "%f, %f\n"
+TEST_FLOAT:
+  .string "%f\n"
 TEST_INT:
   .string "%i\n"
+
 WINDOW_TITLE:
   .asciz "snake game"
 
@@ -18,9 +21,9 @@ WINDOW_TITLE:
 score:
   .long 0
 snake_data:
-  .float 1.0
-  .float 1.5
-  .rept 254
+  .float 1.2
+  .float 1.7
+  .rept 255
     .float 0.0
     .float 0.0
   .endr
@@ -35,15 +38,8 @@ _start:
 
 main_loop_begin:
   
-  leaq snake_data(%rip), %r8
-  leaq score(%rip), %r9
-  movq (%r9), %rbx
-  leaq (%r8,%rbx,8), %rax
-
-  leaq TEST_FLOATS(%RIP), %rdi
-  movq (%rax), %rsi
-  addq $4, %rax
-  movq (%rax), %rdx
+  movss snake_data(%rip), %xmm0
+  movq $TEST_FLOAT, %rdi
   call printf
 
   call BeginDrawing
