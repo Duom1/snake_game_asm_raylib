@@ -7,9 +7,8 @@ fmt:
 .section .text
 .globl _start
 _start:
-  movq $a, %rdi     # Load the address of 'a' into rdi
-  flds (%rdi)       # Load the float from memory into the FPU stack
-  fstps (%rsp)      # Store the float from the FPU stack to the top of the stack
+  subq $32, %rsp
+  movsd a(%rip), %xmm0
   movq $fmt, %rsi   # Load the address of 'fmt' into rsi
   call printf       # Call printf
 
