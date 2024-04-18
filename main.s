@@ -25,6 +25,13 @@ F1:
   .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
   .equ STARTING_SCORE, 0
 
+  .equ KEY_NULL,  0
+  .equ KEY_ESC,   256
+  .equ KEY_W,     87
+  .equ KEY_A,     65
+  .equ KEY_S,     83
+  .equ KEY_D,     68
+
   .equ STAL16, 0xfffffffffffffff0
   .equ ST_SNAKEDATA_ADR, 4
 
@@ -33,7 +40,7 @@ F1:
   .globl _start
 _start:
   # setting up the stack
-  sub $4, %rsp
+  sub $8, %rsp
   movq %rsp, %rbp
   and $STAL16, %rsp
 
@@ -50,6 +57,9 @@ _start:
   leaq WINDOW_TITLE(%rip), %rdx
   call InitWindow
 
+  movq $KEY_NULL, %rdi
+  call SetExitKey
+
 main_loop_begin:
 _drawing:
   call BeginDrawing
@@ -61,9 +71,22 @@ _drawing:
   movq $10, %rsi
   call DrawFPS
 
+  movq $KEY_W, %rdi
+  call IsKeyDown
+  test %rax, %rax
+  jz no_w
+  movq $40, %rdi
+  movq $40, %rsi
+  movq $100, %rdx
+  movq $100, %rcx
+  movq COLOR_RED(%rip), %r8
+  call DrawRectangle
+  no_w:
+
   call EndDrawing
   
 _game_logic:
+
   leaq TEST_FLOATS(%rip), %rdi
   movq ST_SNAKEDATA_ADR(%rbp), %rax
   movq $0, %rbx
