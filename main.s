@@ -5,10 +5,6 @@ TEST_FLOATS:
   .string "%f, %f\n"
 TEST_FLOAT:
   .string "%.4f\n"
-TEST_INT:
-  .string "%i\n"
-TEST_HEX:
-  .string "%x\n"
 
 WINDOW_TITLE:
   .asciz "snake game"
@@ -23,11 +19,9 @@ WINDOW_TITLE:
   .section .data
 score:
   .long 0
-test_val:
-  .float 3.1415
 snake_data:
-  .float 1.2
-  .float 1.7
+  .float 1.0
+  .float 1.0
   .rept 255
   .float 0.0
   .float 0.0
@@ -36,6 +30,9 @@ snake_data:
   .globl _start
   .section .text
 _start:
+  sub $8, %rsp
+  and $STAL16, %rsp
+
   movq $WINDOW_X, %rdi
   movq $WINDOW_Y, %rsi
   leaq WINDOW_TITLE(%rip), %rdx
@@ -47,19 +44,18 @@ main_loop_begin:
   movq COLOR_WHITE(%rip), %rdi
   call ClearBackground
 
+  movq $10, %rdi
+  movq $10, %rsi
+  call DrawFPS
+
   call EndDrawing
 
-  sub $8, %rsp
-  and $STAL16, %rsp
-  pxor %xmm0, %xmm0
-  cvtss2sd test_val(%rip), %xmm0
-  movq $1, %rax
   leaq TEST_FLOAT(%rip), %rdi
+  cvtss2sd snake_data(%rip), %xmm0
+  mov $1, %rax
   call printf
-  add $8, %rsp
 
 _window_close_check:
-  sub $8, %rsp
   call WindowShouldClose
   testq %rax, %rax
   jz main_loop_begin
