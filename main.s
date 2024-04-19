@@ -25,22 +25,19 @@ F1:
   .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
   .equ STARTING_SCORE, 0
 
-  .equ KEY_NULL,  0
-  .equ KEY_ESC,   256
-  .equ KEY_W,     87
-  .equ KEY_A,     65
-  .equ KEY_S,     83
-  .equ KEY_D,     68
+  .include "key_def.s"
+  .include "dir_def.s"
 
   .equ STAL16, 0xfffffffffffffff0
-  .equ ST_SNAKEDATA_ADR, 4
+  .equ ST_SNAKEDATA_ADR, 8
+  .equ ST_DIR, 4
 
 # === text section ===
   .section .text
   .globl _start
 _start:
   # setting up the stack
-  sub $8, %rsp
+  sub $12, %rsp
   movq %rsp, %rbp
   and $STAL16, %rsp
 
@@ -71,30 +68,30 @@ _drawing:
   movq $10, %rsi
   call DrawFPS
 
-  movq $KEY_W, %rdi
-  call IsKeyDown
-  test %rax, %rax
-  jz no_w
+  call get_input
+  cmpq $2, %rax
+  jne no
   movq $40, %rdi
   movq $40, %rsi
   movq $100, %rdx
   movq $100, %rcx
-  movq COLOR_RED(%rip), %r8
+  movq COLOR_GREEN(%rip), %r8
   call DrawRectangle
-  no_w:
+no:
 
   call EndDrawing
   
 _game_logic:
-
-  leaq TEST_FLOATS(%rip), %rdi
+  
+  # code for checking the snake data
+  /*leaq TEST_FLOATS(%rip), %rdi
   movq ST_SNAKEDATA_ADR(%rbp), %rax
   movq $0, %rbx
   cvtss2sd (%rax,%rbx,4), %xmm0
   addq $1, %rbx
   cvtss2sd (%rax,%rbx,4), %xmm1
   mov $1, %rax
-  call printf
+  call printf */
 
 _window_close_check:
   call WindowShouldClose
@@ -108,3 +105,4 @@ exit_program:
   movq $60, %rax
   xor %rbx, %rbx
   syscall
+

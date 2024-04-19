@@ -24,3 +24,8 @@ COLOR_BLACK:
   .byte 0x00  # green
   .byte 0x00  # blue
   .byte 0xFF  # alpha
+COLOR_GREY:
+  .byte 0xAA  # red
+  .byte 0xAA  # green
+  .byte 0xAA  # blue
+  .byte 0xFF  # alpha
