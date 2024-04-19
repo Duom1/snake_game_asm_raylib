@@ -1,11 +1,13 @@
 # === readonly data section ===
-  .include "colors.s"
+  .include "color_def.s"
 
   .section .rodata
 TEST_FLOATS:
   .string "%.2f, %.2f\n"
+TEST_INT:
+  .string "%i\n"
 WINDOW_TITLE:
-  .asciz "snake game"
+  .string "snake game"
 F1:
   .float 1.0
 
@@ -13,9 +15,13 @@ F1:
   .section .bss
   .lcomm score, 8             # 64 bit score
   .lcomm snake_data, 4*2*256  # size of float * Vector2 * 256
+  .lcomm snake_data_ptr, 8    # this is used to store the pointer to snake_data
+  .lcomm update_cnt, 8        # counting the update time
 
 # === data section ===
-#  .section .data
+  .section .data
+direction:
+  .long 4
 
 # === constants ===
   .equ BLOCKS_X, 25
@@ -24,26 +30,26 @@ F1:
   .equ WINDOW_X, BLOCKS_X * PIXELS_PER_BLOCK
   .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
   .equ STARTING_SCORE, 0
+  .equ TARGET_FPS, 60
+  .equ UPDATE_FR, 25
 
   .include "key_def.s"
   .include "dir_def.s"
 
   .equ STAL16, 0xfffffffffffffff0
-  .equ ST_SNAKEDATA_ADR, 8
-  .equ ST_DIR, 4
 
 # === text section ===
   .section .text
   .globl _start
 _start:
   # setting up the stack
-  sub $12, %rsp
+  sub $0, %rsp
   movq %rsp, %rbp
   and $STAL16, %rsp
 
-  # saving the address of snakedata to the stack
+  # saving the address of snake_data
   leaq snake_data(%rip), %rax
-  movq %rax, ST_SNAKEDATA_ADR(%rbp)
+  movq %rax, snake_data_ptr(%rip)
   # set the first Vector2 to both ones
   movss F1(%rip), %xmm0
   movss %xmm0, (%rax)
@@ -54,8 +60,11 @@ _start:
   leaq WINDOW_TITLE(%rip), %rdx
   call InitWindow
 
-  movq $KEY_NULL, %rdi
+  movl $KEY_NULL, %edi
   call SetExitKey
+
+  movl $TARGET_FPS, %edi
+  call SetTargetFPS
 
 main_loop_begin:
 _drawing:
@@ -68,30 +77,25 @@ _drawing:
   movq $10, %rsi
   call DrawFPS
 
-  call get_input
-  cmpq $2, %rax
-  jne no
-  movq $40, %rdi
-  movq $40, %rsi
-  movq $100, %rdx
-  movq $100, %rcx
-  movq COLOR_GREEN(%rip), %r8
-  call DrawRectangle
-no:
-
   call EndDrawing
   
 _game_logic:
   
-  # code for checking the snake data
-  /*leaq TEST_FLOATS(%rip), %rdi
-  movq ST_SNAKEDATA_ADR(%rbp), %rax
-  movq $0, %rbx
-  cvtss2sd (%rax,%rbx,4), %xmm0
-  addq $1, %rbx
-  cvtss2sd (%rax,%rbx,4), %xmm1
-  mov $1, %rax
-  call printf */
+  call get_input
+  testl %eax, %eax
+  jz no_change
+  movl %eax, direction(%rip)
+no_change:
+
+  movq update_cnt(%rip), %rbx
+  cmpq $UPDATE_FR, %rbx
+  jng no_update
+  movq $0, update_cnt(%rip)
+  # update snake posidon here
+  leaq WINDOW_TITLE(%rip), %rdi
+  call puts
+no_update:
+  addq $1, update_cnt(%rip)
 
 _window_close_check:
   call WindowShouldClose
