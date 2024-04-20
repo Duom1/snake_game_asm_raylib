@@ -1,6 +1,4 @@
 # === readonly data section ===
-  .include "color_def.s"
-
   .section .rodata
 TEST_FLOATS:
   .string "%.2f, %.2f\n"
@@ -8,13 +6,11 @@ TEST_INT:
   .string "%i\n"
 WINDOW_TITLE:
   .string "snake game"
-F1:
-  .float 1.0
 
 # === bss section ===
   .section .bss
   .lcomm score, 8             # 64 bit score
-  .lcomm snake_data, 4*2*256  # size of float * Vector2 * 256
+  .lcomm snake_data, 8*2*256  # size of quad word * vec2 * 256
   .lcomm snake_data_ptr, 8    # this is used to store the pointer to snake_data
   .lcomm update_cnt, 8        # counting the update time
 
@@ -35,6 +31,7 @@ direction:
 
   .include "key_def.s"
   .include "dir_def.s"
+  .include "color_def.s"
 
   .equ STAL16, 0xfffffffffffffff0
 
@@ -43,7 +40,7 @@ direction:
   .globl _start
 _start:
   # setting up the stack
-  sub $0, %rsp
+  sub $8, %rsp
   movq %rsp, %rbp
   and $STAL16, %rsp
 
@@ -51,9 +48,8 @@ _start:
   leaq snake_data(%rip), %rax
   movq %rax, snake_data_ptr(%rip)
   # set the first Vector2 to both ones
-  movss F1(%rip), %xmm0
-  movss %xmm0, (%rax)
-  movss %xmm0, 4(%rax)
+  movq $1, (%rax)
+  movq $2, 8(%rax)
 
   movq $WINDOW_X, %rdi
   movq $WINDOW_Y, %rsi
@@ -70,8 +66,13 @@ main_loop_begin:
 _drawing:
   call BeginDrawing
 
-  movq COLOR_WHITE(%rip), %rdi
+  #movq COLOR_BLACK(%rip), %rdi
+  movq $COLOR_GREY, %rdi
   call ClearBackground
+
+  movq snake_data_ptr(%rip), %rdi
+  movq $PIXELS_PER_BLOCK, %rsi
+  call draw_snake
 
   movq $10, %rdi
   movq $10, %rsi
@@ -87,7 +88,7 @@ _game_logic:
   movl %eax, direction(%rip)
 no_change:
 
-  movq update_cnt(%rip), %rbx
+  /*movq update_cnt(%rip), %rbx
   cmpq $UPDATE_FR, %rbx
   jng no_update
   movq $0, update_cnt(%rip)
@@ -95,7 +96,7 @@ no_change:
   leaq WINDOW_TITLE(%rip), %rdi
   call puts
 no_update:
-  addq $1, update_cnt(%rip)
+  addq $1, update_cnt(%rip)*/
 
 _window_close_check:
   call WindowShouldClose
