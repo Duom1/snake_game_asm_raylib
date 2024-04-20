@@ -3,14 +3,18 @@ SOURCE = main.s \
 				 draw_snake.s \
 				 place_food.s \
 				 draw_food.s
+OTHERFILES = const_def.s \
+						 color_def.s \
+						 dir_def.s \
+						 key_def.s
 OBJS = $(SOURCE:.s=.o)
 NAME = prog
 DYNAMIC_LINKER = /lib64/ld-linux-x86-64.so.2
 
 .PHONY: clean
 
-$(NAME): $(OBJS)
-	ld $^ -o $@ -lc -lm -lraylib -dynamic-linker $(DYNAMIC_LINKER)
+$(NAME): $(OBJS) $(OTHERFILES)
+	ld $(OBJS) -o $@ -lc -lm -lraylib -dynamic-linker $(DYNAMIC_LINKER)
 
 %.o: %.s
 	as -o $@ $<

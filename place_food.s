@@ -8,11 +8,13 @@ place_food:
   movq %rsp, %rbp
   subq $16, %rsp
 
+  decq %rsi
+  decq %rdx
+
   movq %rdi, ST_COORD_PTR(%rbp)
   movq %rdx, ST_Y(%rbp)
 
   movq $0, %rdi
-  #movq %rsi, %rsi
   call GetRandomValue
   movq ST_COORD_PTR(%rbp), %rbx
   movq %rax, (%rbx)
