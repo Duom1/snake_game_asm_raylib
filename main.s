@@ -1,23 +1,13 @@
 # === constants ===
-  .equ BLOCKS_X, 15
-  .equ BLOCKS_Y, 12
-  .equ PIXELS_PER_BLOCK, 50
-  .equ WINDOW_X, BLOCKS_X * PIXELS_PER_BLOCK
-  .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
-  .equ STARTING_SCORE, 0
-  .equ TARGET_FPS, 60
-  .equ UPDATE_FR, 18
-
+  .include "const_def.s"
   .include "key_def.s"
   .include "dir_def.s"
   .include "color_def.s"
 
-  .equ STAL16, 0xfffffffffffffff0
-
 # === readonly data section ===
   .section .rodata
-TEST_FLOATS:
-  .string "%.2f, %.2f\n"
+TEST_INTS:
+  .string "%i, %i\n"
 TEST_INT:
   .string "%i\n"
 WINDOW_TITLE:
@@ -26,9 +16,10 @@ WINDOW_TITLE:
 # === bss section ===
   .section .bss
   .lcomm score, 8             # 64 bit score
-  .lcomm snake_data, 8*2*256  # size of quad word * vec2 * 256
+  .lcomm snake_data, 8*2*256  # size of quad word * 2 * 256
   .lcomm snake_data_ptr, 8    # this is used to store the pointer to snake_data
   .lcomm update_cnt, 8        # counting the update time
+  .lcomm food_pos, 8*2        # x, y coordinates
 
 # === data section ===
   .section .data
@@ -62,8 +53,12 @@ _start:
   movl $TARGET_FPS, %edi
   call SetTargetFPS
 
+  leaq food_pos(%rip), %rdi
+  movq $BLOCKS_X, %rsi
+  movq $BLOCKS_Y, %rdx
+  call place_food
+
 main_loop_begin:
-_drawing:
   call BeginDrawing
 
   movq $COLOR_BLACK, %rdi
@@ -71,12 +66,13 @@ _drawing:
 
   movq snake_data_ptr(%rip), %rdi
   movq $PIXELS_PER_BLOCK, %rsi
-  #movq score(%rip), %rdx
   call draw_snake
 
+  leaq food_pos(%rip), %rdi
+  movq $PIXELS_PER_BLOCK, %rsi
+  call draw_food
+
   call EndDrawing
-  
-_game_logic:
   
   #changing the direction based on the input
   call get_input
@@ -90,7 +86,7 @@ no_change:
   cmpq $UPDATE_FR, %rbx
   jng no_update
   movq $0, update_cnt(%rip)
-  movq direction(%rip), %rax
+  movl direction(%rip), %eax
   movq snake_data_ptr(%rip), %rbx
   cmpl $1, %eax
   je go_up
@@ -116,12 +112,10 @@ go_right:
 no_update:
   addq $1, update_cnt(%rip)
 
-_window_close_check:
   call WindowShouldClose
   testq %rax, %rax
   jz main_loop_begin
 
-main_loop_exit:
   call CloseWindow
 
 exit_program:

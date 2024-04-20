@@ -9,34 +9,34 @@ get_input:
   movq %rsp, %rbp
   subq $4, %rsp
 
-  movq $0, ST_LDIR(%rbp)
+  movl $0, ST_LDIR(%rbp)
 
-  movq $KEY_W, %rdi
+  movl $KEY_W, %edi
   call IsKeyDown
   test %rax, %rax
   jz no_w
-  movq $DIR_UP, ST_LDIR(%rbp)
+  movl $DIR_UP, ST_LDIR(%rbp)
 no_w:
-  movq $KEY_A, %rdi
+  movl $KEY_A, %edi
   call IsKeyDown
   test %rax, %rax
   jz no_a
-  movq $DIR_LEFT, ST_LDIR(%rbp)
+  movl $DIR_LEFT, ST_LDIR(%rbp)
 no_a:
-  movq $KEY_S, %rdi
+  movl $KEY_S, %edi
   call IsKeyDown
   test %rax, %rax
   jz no_s
-  movq $DIR_DOWN, ST_LDIR(%rbp)
+  movl $DIR_DOWN, ST_LDIR(%rbp)
 no_s:
-  movq $KEY_D, %rdi
+  movl $KEY_D, %edi
   call IsKeyDown
   test %rax, %rax
   jz no_d
-  movq $DIR_RIGHT, ST_LDIR(%rbp)
+  movl $DIR_RIGHT, ST_LDIR(%rbp)
 no_d:
 
-  movq ST_LDIR(%rbp), %rax
+  movl ST_LDIR(%rbp), %eax
 
   addq $4, %rsp
   popq %rbp
