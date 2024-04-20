@@ -1,3 +1,19 @@
+# === constants ===
+  .equ BLOCKS_X, 15
+  .equ BLOCKS_Y, 12
+  .equ PIXELS_PER_BLOCK, 50
+  .equ WINDOW_X, BLOCKS_X * PIXELS_PER_BLOCK
+  .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
+  .equ STARTING_SCORE, 0
+  .equ TARGET_FPS, 60
+  .equ UPDATE_FR, 18
+
+  .include "key_def.s"
+  .include "dir_def.s"
+  .include "color_def.s"
+
+  .equ STAL16, 0xfffffffffffffff0
+
 # === readonly data section ===
   .section .rodata
 TEST_FLOATS:
@@ -18,22 +34,6 @@ WINDOW_TITLE:
   .section .data
 direction:
   .long 4
-
-# === constants ===
-  .equ BLOCKS_X, 25
-  .equ BLOCKS_Y, 17
-  .equ PIXELS_PER_BLOCK, 25
-  .equ WINDOW_X, BLOCKS_X * PIXELS_PER_BLOCK
-  .equ WINDOW_Y, BLOCKS_Y * PIXELS_PER_BLOCK
-  .equ STARTING_SCORE, 0
-  .equ TARGET_FPS, 60
-  .equ UPDATE_FR, 25
-
-  .include "key_def.s"
-  .include "dir_def.s"
-  .include "color_def.s"
-
-  .equ STAL16, 0xfffffffffffffff0
 
 # === text section ===
   .section .text
@@ -66,37 +66,55 @@ main_loop_begin:
 _drawing:
   call BeginDrawing
 
-  #movq COLOR_BLACK(%rip), %rdi
-  movq $COLOR_GREY, %rdi
+  movq $COLOR_BLACK, %rdi
   call ClearBackground
 
   movq snake_data_ptr(%rip), %rdi
   movq $PIXELS_PER_BLOCK, %rsi
+  #movq score(%rip), %rdx
   call draw_snake
-
-  movq $10, %rdi
-  movq $10, %rsi
-  call DrawFPS
 
   call EndDrawing
   
 _game_logic:
   
+  #changing the direction based on the input
   call get_input
   testl %eax, %eax
   jz no_change
   movl %eax, direction(%rip)
 no_change:
 
-  /*movq update_cnt(%rip), %rbx
+  # update the snake position
+  movq update_cnt(%rip), %rbx
   cmpq $UPDATE_FR, %rbx
   jng no_update
   movq $0, update_cnt(%rip)
-  # update snake posidon here
-  leaq WINDOW_TITLE(%rip), %rdi
-  call puts
+  movq direction(%rip), %rax
+  movq snake_data_ptr(%rip), %rbx
+  cmpl $1, %eax
+  je go_up
+  cmpl $2, %eax
+  je go_down
+  cmpl $3, %eax
+  je go_left
+  cmpl $4, %eax
+  je go_right
+  jmp no_update
+go_up:
+  decq 8(%rbx)
+  jmp no_change
+go_down:
+  incq 8(%rbx)
+  jmp no_change
+go_left:
+  decq (%rbx)
+  jmp no_change
+go_right:
+  incq (%rbx)
+  jmp no_change
 no_update:
-  addq $1, update_cnt(%rip)*/
+  addq $1, update_cnt(%rip)
 
 _window_close_check:
   call WindowShouldClose
