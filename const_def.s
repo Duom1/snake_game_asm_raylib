@@ -7,4 +7,6 @@
 .equ TARGET_FPS, 60
 .equ UPDATE_FR, 18
 .equ SCORE_TEXT_SIZE, WINDOW_X / 20
+.equ TRUE, 1
+.equ FALSE, 0
 .equ STAL16, 0xfffffffffffffff0

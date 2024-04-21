@@ -6,8 +6,6 @@
 
 # === readonly data section ===
   .section .rodata
-TEST:
-  .string "%i, %i\n"
 WINDOW_TITLE:
   .string "snake game"
 SCORE_FMT:
@@ -20,12 +18,12 @@ SCORE_FMT:
   .lcomm snake_data_ptr, 8    # this is used to store the pointer to snake_data
   .lcomm update_cnt, 8        # counting the update time
   .lcomm food_pos, 8*2        # x, y coordinates
-  .lcomm score_str, 16         # space for the printable score
+  .lcomm score_str, 16        # space for the printable score
 
 # === data section ===
   .section .data
 direction:
-  .long 4
+  .long 0
 
 # === text section ===
   .section .text
@@ -40,7 +38,7 @@ _start:
   leaq snake_data(%rip), %rax
   movq %rax, snake_data_ptr(%rip)
   # set the first Vector2 to both ones
-  movq $1, (%rax)
+  movq $2, (%rax)
   movq $2, 8(%rax)
 
   movq $WINDOW_X, %rdi
@@ -72,6 +70,7 @@ main_loop_begin:
 
   movq snake_data_ptr(%rip), %rdi
   movq $PIXELS_PER_BLOCK, %rsi
+  movq score(%rip), %rdx
   call draw_snake
 
   leaq food_pos(%rip), %rdi
@@ -91,63 +90,43 @@ main_loop_begin:
   #changing the direction based on the input
   call get_input
   testl %eax, %eax
-  jz no_change
+  jz no_input_change
   movl %eax, direction(%rip)
-no_change:
+no_input_change:
 
   # check if it is time to update
   movq update_cnt(%rip), %rbx
   cmpq $UPDATE_FR, %rbx
   jng no_update
-  # START UPDATING
-  # move the snake
+  # -> START UPDATING
   movq $0, update_cnt(%rip)
-  movl direction(%rip), %eax
-  movq snake_data_ptr(%rip), %rbx
-  cmpl $1, %eax
-  je go_up
-  cmpl $2, %eax
-  je go_down
-  cmpl $3, %eax
-  je go_left
-  cmpl $4, %eax
-  je go_right
-  jmp no_update
-go_up:
-  decq 8(%rbx)
-  jmp continue_update
-go_down:
-  incq 8(%rbx)
-  jmp continue_update
-go_left:
-  decq (%rbx)
-  jmp continue_update
-go_right:
-  incq (%rbx)
-  jmp continue_update
-continue_update:
+  # update snake segments
+  movq snake_data_ptr(%rip), %rdi
+  movq score(%rip), %rsi
+  call update_snake_segments
+  # move the snake head
+  movq snake_data_ptr(%rip), %rdi
+  movl direction(%rip), %esi
+  call move_snake
   # eat check
-  movq snake_data_ptr(%rip), %rax
-  leaq food_pos(%rip), %rbx
-  movq (%rax), %r8
-  movq (%rbx), %r9
-  cmpq %r8, %r9
-  jne no_eating
-  movq 8(%rax), %r8
-  movq 8(%rbx), %r9
-  cmpq %r8, %r9
-  jne no_eating
+  leaq food_pos(%rip), %rdi
+  movq snake_data_ptr(%rip), %rsi
+  call eat_check
+  testb %al, %al
+  jz no_update
+  # increase score
   incq score(%rip)
+  # move the food
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
   call place_food
+  # change the score string
   leaq score_str(%rip), %rdi
   leaq SCORE_FMT(%rip), %rsi
   movq score(%rip), %rdx
   call sprintf
-no_eating:
-  # END UPDATING
+  # -> END UPDATING
 no_update:
   addq $1, update_cnt(%rip)
 
