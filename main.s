@@ -135,7 +135,7 @@ no_update:
   testq %rax, %rax
   jz main_loop_begin
 
-  # actually closing the window
+  # closing the window
   call CloseWindow
 
 exit_program:
