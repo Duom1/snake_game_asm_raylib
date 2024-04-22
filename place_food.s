@@ -10,6 +10,7 @@
   .equ ST_SCORE, -40
   .equ ST_X_MAX, -48
   .equ ST_Y_MAX, -56
+  .equ ST_OG_SCORE, -64
 place_food:
   pushq %rbp
   movq %rsp, %rbp
@@ -19,10 +20,11 @@ place_food:
   decq %rdx
   movq %rsi, ST_X_MAX(%rbp)
   movq %rdx, ST_Y_MAX(%rbp)
-  movq %r8, ST_SCORE(%rbp)
+  movq %r8, ST_OG_SCORE(%rbp)
   movq %rdi, ST_COORD_PTR(%rbp)
   movq %rcx, ST_SNAKE_PTR(%rbp)
 
+generate_numbers:
   movq ST_X_MAX(%rbp), %rsi
   movq $0, %rdi
   call GetRandomValue
@@ -31,6 +33,35 @@ place_food:
   movq $0, %rdi
   call GetRandomValue
   movq %rax, ST_Y(%rbp)
+
+  movq ST_OG_SCORE(%rbp), %rax
+  movq %rax, ST_SCORE(%rbp)
+  
+  jmp exit_check
+
+check_loop:
+  movq ST_SNAKE_PTR(%rbp), %rbx
+  movq ST_SCORE(%rbp), %rax
+  imulq $2, %rax
+  leaq (%rbx,%rax,8), %rcx
+  movq (%rcx), %r8
+  movq ST_X(%rbp), %r9
+  cmpq %r8, %r9
+  jne continue
+  incq %rax
+  leaq (%rbx,%rax,8), %rcx
+  movq (%rcx), %r8
+  movq ST_X(%rbp), %r9
+  cmpq %r8, %r9
+  jne continue
+  jmp generate_numbers
+continue:
+
+  decq ST_SCORE(%rbp)
+exit_check:
+  movq ST_SCORE(%rbp), %rax
+  testq %rax, %rax
+  jnz check_loop
 
   movq ST_COORD_PTR(%rbp), %rbx
   movq ST_X(%rbp), %rcx

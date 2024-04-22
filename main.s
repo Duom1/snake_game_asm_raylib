@@ -38,8 +38,8 @@ _start:
   leaq snake_data(%rip), %rax
   movq %rax, snake_data_ptr(%rip)
   # set the first Vector2 to both ones
-  movq $2, (%rax)
-  movq $2, 8(%rax)
+  movq $0, (%rax)
+  movq $0, 8(%rax)
 
   movq $WINDOW_X, %rdi
   movq $WINDOW_Y, %rsi
@@ -55,6 +55,8 @@ _start:
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
+  movq snake_data_ptr(%rip), %rcx
+  movq score(%rip), %r8
   call place_food
 
   leaq score_str(%rip), %rdi
@@ -120,6 +122,8 @@ no_input_change:
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
+  movq snake_data_ptr(%rip), %rcx
+  movq score(%rip), %r8
   call place_food
   # change the score string
   leaq score_str(%rip), %rdi

@@ -6,25 +6,25 @@ SOURCE = main.s \
 				 eat_check.s \
 				 move_snake.s \
 				 update_snake_segments.s
-OTHERFILES = const_def.s \
-						 color_def.s \
-						 dir_def.s \
-						 key_def.s
 OBJS = $(SOURCE:.s=.o)
 NAME = prog
 DYNAMIC_LINKER = /lib64/ld-linux-x86-64.so.2
 EXTRA =
 
-.PHONY: clean
+.PHONY: clean debug
 
-$(NAME): $(OBJS) $(OTHERFILES)
+$(NAME): $(OBJS)
 	ld $(OBJS) $(EXTRA) -o $@ -lc -lm -lraylib -dynamic-linker $(DYNAMIC_LINKER)
 
 debug: EXTRA += -g
 debug: $(NAME)
 
+place_food_test: EXTRA += -g
+place_food_test: place_food_test.o place_food.o
+	ld -g place_food_test.o place_food.o -o $@ -lc -lm -lraylib -dynamic-linker $(DYNAMIC_LINKER)
+
 %.o: %.s
 	as $(EXTRA) -o $@ $< 
 
 clean:
-	rm -f $(OBJS) $(NAME)
+	rm -f $(OBJS) $(NAME) place_food_test.o
