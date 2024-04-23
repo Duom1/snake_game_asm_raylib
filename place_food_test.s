@@ -1,17 +1,23 @@
   .include "const_def.s"
-  # this is a program to test the place_food function
+  # This is a program to test the place_food function.
+  # If it just hangs without giving any input the ""test"" passes.
+  # That is because the entire playing field if full and 
+  # the function is trying to find a random coordinate to place the
+  # food but it just hangs.
 
   .section .rodata # rodtata
 fmt:
   .string "%i, %i\n"
+seed:
+  .quad 0x66ea76ade53ff10a
 
   .section .bss # bss
   .lcomm POS, 16
-  .lcomm seed, 8
 
   .section .data # data
 snake:
-  .quad 0,0, 1,0, 2,0, 3,0,  0,1, 1,1, 2,1, 3,1
+  .quad 0,0, 1,0, 2,0, 3,0,  0,1, 1,1, 2,1, 3,1,
+  .quad 0,2, 1,2, 2,2, 3,2,  0,3, 1,3, 2,3, 3,3
 
   .section .text #text
   .globl _start
@@ -27,7 +33,7 @@ _start:
   leaq snake(%rip), %rcx
   movq $4, %rsi
   movq $4, %rdx
-  movq $7, %r8
+  movq $15, %r8
   call place_food
   leaq fmt(%rip), %rdi
   leaq POS(%rip), %rax

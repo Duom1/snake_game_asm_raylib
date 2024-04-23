@@ -51,7 +51,7 @@ check_loop:
   incq %rax
   leaq (%rbx,%rax,8), %rcx
   movq (%rcx), %r8
-  movq ST_X(%rbp), %r9
+  movq ST_Y(%rbp), %r9
   cmpq %r8, %r9
   jne continue
   jmp generate_numbers

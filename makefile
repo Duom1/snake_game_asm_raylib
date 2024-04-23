@@ -27,4 +27,4 @@ place_food_test: place_food_test.o place_food.o
 	as $(EXTRA) -o $@ $< 
 
 clean:
-	rm -f $(OBJS) $(NAME) place_food_test.o
+	rm -f $(OBJS) $(NAME) place_food_test.o place_food_test
