@@ -194,7 +194,7 @@ not_out_of_bounds:
   # eat check
   leaq food_pos(%rip), %rdi
   movq snake_data_ptr(%rip), %rsi
-  call eat_check
+  call pos_check
   testb %al, %al
   jz no_update
 
