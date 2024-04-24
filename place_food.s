@@ -5,11 +5,11 @@
   .equ LOCAL_ST, 64
   .equ ST_COORD_PTR, -8
   .equ ST_SNAKE_PTR, -16
-  .equ ST_X, -24
-  .equ ST_Y, -32
+  .equ ST_Y, -24
+  .equ ST_X, -32
   .equ ST_SCORE, -40
-  .equ ST_X_MAX, -48
-  .equ ST_Y_MAX, -56
+  .equ ST_Y_MAX, -48
+  .equ ST_X_MAX, -56
   .equ ST_OG_SCORE, -64
 place_food:
   pushq %rbp
@@ -43,17 +43,11 @@ check_loop:
   movq ST_SNAKE_PTR(%rbp), %rbx
   movq ST_SCORE(%rbp), %rax
   imulq $2, %rax
-  leaq (%rbx,%rax,8), %rcx
-  movq (%rcx), %r8
-  movq ST_X(%rbp), %r9
-  cmpq %r8, %r9
-  jne continue
-  incq %rax
-  leaq (%rbx,%rax,8), %rcx
-  movq (%rcx), %r8
-  movq ST_Y(%rbp), %r9
-  cmpq %r8, %r9
-  jne continue
+  leaq (%rbx,%rax,8), %rdi
+  leaq ST_X(%rbp), %rsi
+  call pos_check
+  testb %al, %al
+  jz continue
   jmp generate_numbers
 continue:
 

@@ -22,11 +22,10 @@ PAUSE_MSG:
   .lcomm food_pos, 8*2        # x, y coordinates
   .lcomm score_str, 16        # space for the printable score
   .lcomm pause, 1             # the boolen to check if game is paused
+  .lcomm direction, 4         # used to store the direction player is going in
 
 # === data section ===
-  .section .data
-direction:
-  .long 0
+#  .section .data
 
 # === text section ===
   .section .text
@@ -40,9 +39,6 @@ _start:
   # saving the address of snake_data
   leaq snake_data(%rip), %rax
   movq %rax, snake_data_ptr(%rip)
-  # set the first Vector2 to both ones
-  movq $0, (%rax)
-  movq $0, 8(%rax)
 
   movq $WINDOW_X, %rdi
   movq $WINDOW_Y, %rsi
@@ -55,14 +51,26 @@ _start:
   movl $TARGET_FPS, %edi
   call SetTargetFPS
 
+  jmp init
+
+game_over:
+init:
+  movq $STARTING_SCORE, score(%rip)
+
+  movl $0, direction(%eip)
+
+  movq snake_data_ptr(%rip), %rax
+  movq $0, (%rax)
+  movq $0, 8(%rax)
+
+  movb $FALSE, pause(%rip)
+
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
   movq snake_data_ptr(%rip), %rcx
   movq score(%rip), %r8
   call place_food
-
-  movb $FALSE, pause(%rip)
 
   leaq score_str(%rip), %rdi
   leaq SCORE_FMT(%rip), %rsi
@@ -123,6 +131,7 @@ no_input_change:
   movb (%rax), %bl
   testb %bl, %bl
   jnz no_update
+
   # -> START UPDATING
   movq $0, update_cnt(%rip)
   # update snake segments
@@ -133,12 +142,24 @@ no_input_change:
   movq snake_data_ptr(%rip), %rdi
   movl direction(%rip), %esi
   call move_snake
+
+  # cheking ig the snake if out of bounds
+  movq snake_data_ptr(%rip), %rdi
+  movq $BLOCKS_X, %rsi
+  movq $BLOCKS_Y, %rdx
+  call out_of_bounds
+  testb %al, %al
+  jz not_out_of_bounds
+  jmp game_over
+not_out_of_bounds:
+
   # eat check
   leaq food_pos(%rip), %rdi
   movq snake_data_ptr(%rip), %rsi
   call eat_check
   testb %al, %al
   jz no_update
+
   # increase score
   incq score(%rip)
   # move the food
@@ -154,6 +175,7 @@ no_input_change:
   movq score(%rip), %rdx
   call sprintf
   # -> END UPDATING
+
 no_update:
   addq $1, update_cnt(%rip)
 
@@ -167,6 +189,6 @@ no_update:
 
 exit_program:
   movq $60, %rax
-  xor %rbx, %rbx
+  xorq %rdi, %rdi
   syscall
 
