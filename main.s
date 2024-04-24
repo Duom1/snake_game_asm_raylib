@@ -10,6 +10,8 @@ WINDOW_TITLE:
   .string "snake game"
 SCORE_FMT:
   .string "Score: %i"
+PAUSE_MSG:
+  .string "Paused"
 
 # === bss section ===
   .section .bss
@@ -19,6 +21,7 @@ SCORE_FMT:
   .lcomm update_cnt, 8        # counting the update time
   .lcomm food_pos, 8*2        # x, y coordinates
   .lcomm score_str, 16        # space for the printable score
+  .lcomm pause, 1             # the boolen to check if game is paused
 
 # === data section ===
   .section .data
@@ -59,6 +62,8 @@ _start:
   movq score(%rip), %r8
   call place_food
 
+  movb $FALSE, pause(%rip)
+
   leaq score_str(%rip), %rdi
   leaq SCORE_FMT(%rip), %rsi
   movq score(%rip), %rdx
@@ -79,17 +84,31 @@ main_loop_begin:
   movq $PIXELS_PER_BLOCK, %rsi
   call draw_food
 
-  # draw score
+  leaq pause(%rip), %rax
+  movb (%rax), %bl
+  testb %bl, %bl
+  jz draw_score
+  leaq PAUSE_MSG(%rip), %rdi
+  movq $10, %rsi
+  movq $10, %rdx
+  movq $SCORE_TEXT_SIZE, %rcx
+  addq $40, %rcx
+  movq $COLOR_RED, %r8
+  call DrawText
+  jmp no_score
+draw_score:
   leaq score_str(%rip), %rdi
   movq $10, %rsi
   movq $10, %rdx
   movq $SCORE_TEXT_SIZE, %rcx
   movq $COLOR_WHITE, %r8
   call DrawText
+no_score:
 
   call EndDrawing                   # drawing end
   
   #changing the direction based on the input
+  lea pause(%rip), %rdi
   call get_input
   testl %eax, %eax
   jz no_input_change
@@ -100,6 +119,10 @@ no_input_change:
   movq update_cnt(%rip), %rbx
   cmpq $UPDATE_FR, %rbx
   jng no_update
+  leaq pause(%rip), %rax
+  movb (%rax), %bl
+  testb %bl, %bl
+  jnz no_update
   # -> START UPDATING
   movq $0, update_cnt(%rip)
   # update snake segments
