@@ -12,6 +12,8 @@ SCORE_FMT:
   .string "Score: %i"
 PAUSE_MSG:
   .string "Paused"
+GO_MSG:
+  .string "GAME OVER"
 
 # === bss section ===
   .section .bss
@@ -54,14 +56,39 @@ _start:
   jmp init
 
 game_over:
+  movq $60, %r15
+go_draw_loop:
+  call BeginDrawing
+
+  leaq GO_MSG(%rip), %rdi
+  movq $15, %rsi
+  movq $GAME_OVER_Y, %rdx
+  addq $5, %rdx
+  movq $LARGE_TEXT_SIZE, %rcx
+  movq $COLOR_DARKRED, %r8
+  call DrawText
+
+  leaq GO_MSG(%rip), %rdi
+  movq $10, %rsi
+  movq $GAME_OVER_Y, %rdx
+  movq $LARGE_TEXT_SIZE, %rcx
+  movq $COLOR_RED, %r8
+  call DrawText
+
+  call EndDrawing
+
+  decq %r15
+  test %r15, %r15
+  jnz go_draw_loop
+
 init:
   movq $STARTING_SCORE, score(%rip)
 
   movl $0, direction(%eip)
 
   movq snake_data_ptr(%rip), %rax
-  movq $0, (%rax)
-  movq $0, 8(%rax)
+  movq $1, (%rax)
+  movq $1, 8(%rax)
 
   movb $FALSE, pause(%rip)
 
@@ -97,18 +124,29 @@ main_loop_begin:
   testb %bl, %bl
   jz draw_score
   leaq PAUSE_MSG(%rip), %rdi
+  movq $15, %rsi
+  movq $15, %rdx
+  movq $LARGE_TEXT_SIZE, %rcx
+  movq $COLOR_DARKRED, %r8
+  call DrawText
+  leaq PAUSE_MSG(%rip), %rdi
   movq $10, %rsi
   movq $10, %rdx
-  movq $SCORE_TEXT_SIZE, %rcx
-  addq $40, %rcx
+  movq $LARGE_TEXT_SIZE, %rcx
   movq $COLOR_RED, %r8
   call DrawText
   jmp no_score
 draw_score:
   leaq score_str(%rip), %rdi
+  movq $13, %rsi
+  movq $13, %rdx
+  movq $TEXT_SIZE, %rcx
+  movq $COLOR_GREY, %r8
+  call DrawText
+  leaq score_str(%rip), %rdi
   movq $10, %rsi
   movq $10, %rdx
-  movq $SCORE_TEXT_SIZE, %rcx
+  movq $TEXT_SIZE, %rcx
   movq $COLOR_WHITE, %r8
   call DrawText
 no_score:
