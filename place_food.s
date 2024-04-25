@@ -18,6 +18,7 @@ place_food:
 
   decq %rsi
   decq %rdx
+  incq %r8
   movq %rsi, ST_X_MAX(%rbp)
   movq %rdx, ST_Y_MAX(%rbp)
   movq %r8, ST_OG_SCORE(%rbp)
@@ -34,8 +35,7 @@ generate_numbers:
   call GetRandomValue
   movq %rax, ST_Y(%rbp)
 
-  movq ST_OG_SCORE(%rbp), %rax
-  movq %rax, ST_SCORE(%rbp)
+  movq $0, ST_SCORE(%rbp)
   
   jmp exit_check
 
@@ -51,11 +51,12 @@ check_loop:
   jmp generate_numbers
 continue:
 
-  decq ST_SCORE(%rbp)
+  incq ST_SCORE(%rbp)
 exit_check:
   movq ST_SCORE(%rbp), %rax
-  testq %rax, %rax
-  jnz check_loop
+  movq ST_OG_SCORE(%rbp), %rcx
+  cmpq %rax, %rcx
+  jne check_loop
 
   movq ST_COORD_PTR(%rbp), %rbx
   movq ST_X(%rbp), %rcx

@@ -16,8 +16,8 @@ EXTRA =
 
 .PHONY: clean debug def default test
 
-def: $(NAME)
 default: $(NAME)
+def: $(NAME)
 
 $(NAME): $(OBJS)
 	ld $(OBJS) $(EXTRA) -o $@ -lc -lm -lraylib -dynamic-linker $(DYNAMIC_LINKER)
