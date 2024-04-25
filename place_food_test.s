@@ -7,15 +7,17 @@ fmt:
 exp:
   .string "expected to be: 3, 3"
 seed:
-  .quad 0x61ea76ade53ff10a
+  .quad 0x8614385096efa53f
 
   .section .bss # bss
   .lcomm POS, 16
 
   .section .data # data
 snake:
-  .quad 0,0, 1,0, 2,0, 3,0,  0,1, 1,1, 2,1, 3,1
-  .quad 0,2, 1,2, 2,2, 3,2,  0,3, 1,3, 2,3
+  .quad 0,0, 1,0, 2,0, 3,0  
+  .quad 0,1, 1,1, 2,1, 3,1
+  .quad 0,2, 1,2, 2,2, 3,2  
+  .quad 0,3, 1,3, 2,3
 
   .section .text #text
   .globl _start
@@ -44,5 +46,5 @@ _start:
   call printf
 
   movl $60, %eax
-  xorl %edi, %edi
+  xorb %dl, %dl
   syscall
