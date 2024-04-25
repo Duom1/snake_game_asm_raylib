@@ -1,3 +1,4 @@
+  .section .text
   .type place_food, @function
   .globl place_food
   # place_food: rdi=pointer to coordinates, rsi=max x, rdx= max y,

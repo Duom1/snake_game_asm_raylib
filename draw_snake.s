@@ -1,5 +1,6 @@
   .include "color_def.s"
 
+  .section .text
   .type draw_snake, @function
   .globl draw_snake
   # draw_snake rdi=pointer to snakedata rsi=block size, rdx=score

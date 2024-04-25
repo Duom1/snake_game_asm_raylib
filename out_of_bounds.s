@@ -1,6 +1,7 @@
   .include "const_def.s"
 
   .section .text
+  .type out_of_bounds, @function
   .globl out_of_bounds
   # out_of_bounds: %rdi=snake pointer, %rsi=max x, %rdx=max y
   # returns 1 to %al if snake head is out of bounds

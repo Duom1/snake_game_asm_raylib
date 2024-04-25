@@ -1,3 +1,4 @@
+  .section .text
   .type update_snake_segments, @function
   .globl update_snake_segments
   # update_snake_segments: rdi=snake data pointer, rsi=score

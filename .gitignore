@@ -1,4 +1,5 @@
 prog
 place_food_test
+pos_check_test
 *.o
 core.*

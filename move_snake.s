@@ -1,3 +1,4 @@
+  .section .text
   .type move_snake, @function
   .globl move_snake
   # move_snake: rdi=pointer to snake head, esi=direction

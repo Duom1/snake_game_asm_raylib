@@ -1,5 +1,6 @@
   .include "const_def.s"
 
+  .section .text
   .type self_hit, @function
   .globl self_hit
   # self_hiy: %rdi=snake pointer, %rsi=score

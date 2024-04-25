@@ -3,7 +3,6 @@ SOURCE = main.s \
 				 draw_snake.s \
 				 place_food.s \
 				 draw_food.s \
-				 eat_check.s \
 				 move_snake.s \
 				 update_snake_segments.s \
 				 pos_check.s \

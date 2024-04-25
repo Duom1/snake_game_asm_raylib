@@ -19,7 +19,6 @@ GO_MSG:
   .section .bss
   .lcomm score, 8             # 64 bit score
   .lcomm snake_data, 8*2*256  # int * vec2 * 256 long list
-  .lcomm snake_data_ptr, 8    # this is used to store the pointer to snake_data
   .lcomm update_cnt, 8        # counting the update time
   .lcomm food_pos, 8*2        # x, y coordinates
   .lcomm score_str, 16        # space for the printable score
@@ -37,10 +36,6 @@ _start:
   sub $8, %rsp
   movq %rsp, %rbp
   and $STAL16, %rsp
-
-  # saving the address of snake_data
-  leaq snake_data(%rip), %rax
-  movq %rax, snake_data_ptr(%rip)
 
   movq $WINDOW_X, %rdi
   movq $WINDOW_Y, %rsi
@@ -86,7 +81,7 @@ init:
 
   movl $0, direction(%eip)
 
-  movq snake_data_ptr(%rip), %rax
+  leaq snake_data(%rip), %rax
   movq $1, (%rax)
   movq $1, 8(%rax)
 
@@ -95,7 +90,7 @@ init:
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
-  movq snake_data_ptr(%rip), %rcx
+  leaq snake_data(%rip), %rcx
   movq score(%rip), %r8
   call place_food
 
@@ -110,7 +105,7 @@ main_loop_begin:
   movq $COLOR_BLACK, %rdi
   call ClearBackground
 
-  movq snake_data_ptr(%rip), %rdi
+  leaq snake_data(%rip), %rdi
   movq $PIXELS_PER_BLOCK, %rsi
   movq score(%rip), %rdx
   call draw_snake
@@ -154,7 +149,8 @@ no_score:
   call EndDrawing                   # drawing end
   
   #changing the direction based on the input
-  lea pause(%rip), %rdi
+  leaq pause(%rip), %rdi
+  movl direction(%rip), %esi
   call get_input
   testl %eax, %eax
   jz no_input_change
@@ -173,16 +169,16 @@ no_input_change:
   # -> START UPDATING
   movq $0, update_cnt(%rip)
   # update snake segments
-  movq snake_data_ptr(%rip), %rdi
+  leaq snake_data(%rip), %rdi
   movq score(%rip), %rsi
   call update_snake_segments
   # move the snake head
-  movq snake_data_ptr(%rip), %rdi
+  leaq snake_data(%rip), %rdi
   movl direction(%rip), %esi
   call move_snake
 
   # check for self hit
-  movq snake_data_ptr(%rip), %rdi
+  leaq snake_data(%rip), %rdi
   movq score(%rip), %rsi
   call self_hit
   testb %al, %al
@@ -191,7 +187,7 @@ no_input_change:
 no_self_hit:
 
   # cheking ig the snake if out of bounds
-  movq snake_data_ptr(%rip), %rdi
+  leaq snake_data(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
   call out_of_bounds
@@ -202,7 +198,7 @@ not_out_of_bounds:
 
   # eat check
   leaq food_pos(%rip), %rdi
-  movq snake_data_ptr(%rip), %rsi
+  leaq snake_data(%rip), %rsi
   call pos_check
   testb %al, %al
   jz no_update
@@ -213,7 +209,7 @@ not_out_of_bounds:
   leaq food_pos(%rip), %rdi
   movq $BLOCKS_X, %rsi
   movq $BLOCKS_Y, %rdx
-  movq snake_data_ptr(%rip), %rcx
+  leaq snake_data(%rip), %rcx
   movq score(%rip), %r8
   call place_food
   # change the score string
