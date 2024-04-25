@@ -3,6 +3,8 @@ my attempt at writing a snake game in gnu x86 64 asembly
 
 files that end with "def.s" are files that define things like colors, constants and keys.
 
+my personal best is 83 on 14x10 size
+
 ## make better:
 
 - [x] draw_snake.s
