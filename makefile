@@ -7,7 +7,8 @@ SOURCE = main.s \
 				 move_snake.s \
 				 update_snake_segments.s \
 				 pos_check.s \
-				 out_of_bounds.s
+				 out_of_bounds.s \
+				 self_hit.s
 OBJS = $(SOURCE:.s=.o)
 NAME = prog
 DYNAMIC_LINKER = /lib64/ld-linux-x86-64.so.2

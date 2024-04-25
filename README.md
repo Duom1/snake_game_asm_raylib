@@ -9,4 +9,6 @@ files that end with "def.s" are files that define things like colors, constants 
 - [x] get_input.s
 - [x] out_of_bounds.s
 - [ ] place_food.s: ignores the head(index 0 off by one error), could use registers instead of the stack
+- [ ] make it so that the player cannot turn into it self
+- [ ] remove useless variable to snakepointer
 - [ ] both tests

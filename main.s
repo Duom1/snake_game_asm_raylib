@@ -181,6 +181,15 @@ no_input_change:
   movl direction(%rip), %esi
   call move_snake
 
+  # check for self hit
+  movq snake_data_ptr(%rip), %rdi
+  movq score(%rip), %rsi
+  call self_hit
+  testb %al, %al
+  jz no_self_hit
+  jmp game_over
+no_self_hit:
+
   # cheking ig the snake if out of bounds
   movq snake_data_ptr(%rip), %rdi
   movq $BLOCKS_X, %rsi

@@ -1,6 +1,7 @@
   .include "const_def.s"
 
   .section .text
+  .type pos_check, @function
   .globl pos_check
   # pos_check: %rdi=first pos, %rsi=second pos
   # Return true or false in %rax.
