@@ -11,7 +11,12 @@ There are no folders (exept for .git, of course).
 Files that end with "def.s" are files that define things like colors, constants and keys.
 This project uses make as the build system in makefile.
 
-## Make better:
+## Images
+
+![image of the game](./images/game1.png)
+![game over](./images/gameover.png)
+
+## Improve:
 
 - [x] draw_snake.s
 - [x] get_input.s
